@@ -175,13 +175,13 @@ class BasicActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.Main) {
             Log.d(TAG, "Before Task 1")
-            doLongRunningTask()
+            doLongRunningTask(1)
             Log.d(TAG, "After Task 1")
         }
 
         lifecycleScope.launch(Dispatchers.Main) {
             Log.d(TAG, "Before Task 2")
-            doLongRunningTask()
+            doLongRunningTask(2)
             Log.d(TAG, "After Task 2")
         }
 
@@ -199,6 +199,8 @@ class BasicActivity : AppCompatActivity() {
         Log.d(TAG, "Function End")
     }
 
+    // similar to #testCoroutineWithMainImmediate and #testCoroutine
+    // as it uses Dispatchers.Main.immediate
     private fun usingMyActivityScope() {
         Log.d(TAG, "Function Start")
         myActivityScope.launch {
@@ -209,30 +211,14 @@ class BasicActivity : AppCompatActivity() {
         Log.d(TAG, "Function End")
     }
 
-    private suspend fun doLongRunningTask() {
-        withContext(Dispatchers.Default) {
-            // your code for doing a long running task
-            // Added delay to simulate
-            Log.d(TAG, "Before Delay")
-            delay(2000)
-            Log.d(TAG, "After Delay")
-        }
-    }
-
-    private suspend fun doLongRunningTaskOne(): Int {
+    private suspend fun doLongRunningTask(taskId: Int? = null) : Int {
         return withContext(Dispatchers.Default) {
             // your code for doing a long running task
             // Added delay to simulate
+            val logSuffix = if (taskId != null) " $taskId" else ""
+            Log.d(TAG, "Before Delay$logSuffix")
             delay(2000)
-            return@withContext 10
-        }
-    }
-
-    private suspend fun doLongRunningTaskTwo(): Int {
-        return withContext(Dispatchers.Default) {
-            // your code for doing a long running task
-            // Added delay to simulate
-            delay(2000)
+            Log.d(TAG, "After Delay$logSuffix")
             return@withContext 10
         }
     }
@@ -287,10 +273,10 @@ class BasicActivity : AppCompatActivity() {
         Log.d(TAG, "Function Start")
         lifecycleScope.launch {
             Log.d(TAG, "Before Task 1")
-            val resultOne = doLongRunningTaskOne()
+            val resultOne = doLongRunningTask(1)
             Log.d(TAG, "After Task 1")
             Log.d(TAG, "Before Task 2")
-            val resultTwo = doLongRunningTaskTwo()
+            val resultTwo =  doLongRunningTask(2)
             Log.d(TAG, "After Task 2")
             val result = resultOne + resultTwo
             Log.d(TAG, "result : $result")
@@ -305,11 +291,11 @@ class BasicActivity : AppCompatActivity() {
             Log.d(TAG, "Before Task")
 
             val deferredOne = async {
-                doLongRunningTaskOne()
+                doLongRunningTask(1)
             }
 
             val deferredTwo = async {
-                doLongRunningTaskTwo()
+                doLongRunningTask(2)
             }
 
             val result = deferredOne.await() + deferredTwo.await()

@@ -24,6 +24,10 @@ import java.util.concurrent.Executors
 
 class BasicActivity : AppCompatActivity() {
 
+    // Note myActivityScope is different from lifecycleScope as
+    // lifecycleScope is a supervisor scope.
+    // Hence, if an exception occurs in myActivityScope by one of the job,
+    // then new job cannot be launched in a cancelled scope.
     private val myActivityScope = CoroutineScope(Dispatchers.Main.immediate)
 
     companion object {
@@ -313,14 +317,14 @@ class BasicActivity : AppCompatActivity() {
 
         val job = lifecycleScope.launch(Dispatchers.Main) {
             Log.d(TAG, "Before Task 1")
-            doLongRunningTask()
+            doLongRunningTask(1)
             Log.d(TAG, "After Task 1")
         }
 
         lifecycleScope.launch(Dispatchers.Main) {
             Log.d(TAG, "Before Task 2")
             job.cancel()
-            doLongRunningTask()
+            doLongRunningTask(2)
             Log.d(TAG, "After Task 2")
         }
 
